@@ -30,6 +30,7 @@ static const char kZipSuffix[] PROGMEM = ".zip";
 static const char kAppcacheSuffix[] PROGMEM = ".appcache";
 #endif // MIMETYPE_MINIMAL
 static const char kGzSuffix[] PROGMEM = ".gz";
+static const char kBrSuffix[] PROGMEM = ".br";
 static const char kDefaultSuffix[] PROGMEM = "";
 
 static const char kHtml[] PROGMEM = "text/html";
@@ -56,6 +57,7 @@ static const char kZip[] PROGMEM = "application/zip";
 static const char kAppcache[] PROGMEM = "text/cache-manifest";
 #endif // MIMETYPE_MINIMAL
 static const char kGz[] PROGMEM = "application/x-gzip";
+static const char kBr[] PROGMEM = "application/x-br";
 static const char kDefault[] PROGMEM = "application/octet-stream";
 
 const Entry mimeTable[maxType] PROGMEM =
@@ -85,6 +87,7 @@ const Entry mimeTable[maxType] PROGMEM =
     { kAppcacheSuffix, kAppcache },
 #endif // MIMETYPE_MINIMAL
     { kGzSuffix, kGz },
+    { kBrSuffix, kBr },
     { kDefaultSuffix, kDefault }
 };
 

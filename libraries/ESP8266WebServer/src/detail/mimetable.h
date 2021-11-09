@@ -33,6 +33,7 @@ enum type
   appcache,
 #endif // MIMETYPE_MINIMAL
   gz,
+  br,
   none,
   maxType
 };

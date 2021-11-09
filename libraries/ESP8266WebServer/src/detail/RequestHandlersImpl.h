@@ -130,6 +130,22 @@ public:
         return SRH::validMethod(requestMethod) && requestUri.startsWith(SRH::_uri);
     }
 
+    String findFile(String& path) {
+        using namespace mime;
+        for (int i = gz; i < maxType; i++)
+        {
+            String type = String(FPSTR(compressedTypes[i].endsWith));
+            if (path.endsWith(type))
+                return path;
+
+            String file = path + type;
+            if (SRH::_fs.exists(file))
+                return file;
+        }
+        
+        return NULL;
+    }
+
     bool handle(WebServerType& server, HTTPMethod requestMethod, const String& requestUri) override {
 
         if (!canHandle(requestMethod, requestUri))
@@ -150,24 +166,15 @@ public:
         if (path.endsWith("/"))
             path += F("index.htm");
 
-        // If neither <blah> nor <blah>.gz exist, and <blah> is a file.htm, try it with file.html instead
-        // For the normal case this will give a search order of index.htm, index.htm.gz, index.html, index.html.gz
-        if (!SRH::_fs.exists(path) && !SRH::_fs.exists(path + ".gz") && path.endsWith(".htm")) {
-            path += 'l';
-        }
-
-        DEBUGV("DirectoryRequestHandler::handle: path=%s\r\n", path.c_str());
-
         String contentType = mime::getContentType(path);
 
-        using namespace mime;
-        // look for gz file, only if the original specified path is not a gz.  So part only works to send gzip via content encoding when a non compressed is asked for
-        // if you point the the path to gzip you will serve the gzip as content type "application/x-gzip", not text or javascript etc...
-        if (!path.endsWith(FPSTR(mimeTable[gz].endsWith)) && !SRH::_fs.exists(path))  {
-            String pathWithGz = path + FPSTR(mimeTable[gz].endsWith);
-            if(SRH::_fs.exists(pathWithGz))
-                path += FPSTR(mimeTable[gz].endsWith);
-        }
+        // If neither <blah> nor any compressed file exist, and <blah> is a file.htm, try it with file.html instead
+        // For the normal case this will give a search order of index.htm, index.htm.gz, index.htm.br, index.html, index.html.gz, index.html.br
+        String compressedPath = getFile(path);
+        if (compressedPath == NULL)
+            compressedPath = getFile(path + 'l');
+
+        DEBUGV("DirectoryRequestHandler::handle: path=%s\r\n", path.c_str());
 
         File f = SRH::_fs.open(path, "r");
         if (!f)

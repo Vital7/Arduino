@@ -547,15 +547,34 @@ String ESP8266WebServerTemplate<ServerType>::credentialHash(const String& userna
 }
 
 template <typename ServerType>
+String ESP8266WebServerTemplate<ServerType>::getCompressedContentType(const String& fileName, const String& contentType)
+{
+  using namespace mime;
+
+  String defaultMimeType = String(FPSTR(mimeTable[none].mimeType));
+  for (int i = gz; i < maxType; i++) {
+    Entry entry = compressedTypes[i];
+    String mimeType = String(FPSTR(entry.mimeType));
+    if (fileName.endsWith(String(FPSTR(entry.endsWith))) &&
+        contentType != mimeType) &&
+        contentType != defaultMimeType) {
+          return mimeType.substring(14);
+    }
+  }
+
+  return NULL;
+}
+
+template <typename ServerType>
 void ESP8266WebServerTemplate<ServerType>::_streamFileCore(const size_t fileSize, const String &fileName, const String &contentType)
 {
   using namespace mime;
   setContentLength(fileSize);
-  if (fileName.endsWith(String(FPSTR(mimeTable[gz].endsWith))) &&
-      contentType != String(FPSTR(mimeTable[gz].mimeType)) &&
-      contentType != String(FPSTR(mimeTable[none].mimeType))) {
-    sendHeader(F("Content-Encoding"), F("gzip"));
+  String type = getCompressedContentType(fileName, contentType);
+  if (type != NULL) {
+    sendHeader(F("Content-Encoding"), type);
   }
+
   send(200, contentType, emptyString);
 }
 
